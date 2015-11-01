@@ -1,6 +1,5 @@
 library(jsonlite)
 library(tm)
-library(wordcloud)
 library(dplyr)
 library(zoo)
 library(ggplot2)
@@ -60,13 +59,17 @@ TestDFSum <- data.frame(TestDTSum)
 ##Plot the star rating over time, averaged monthly
 g1 <- ggplot(TestDFSum, aes(x=YearMonth, y=AvStarsPerMonth)) + 
         geom_line()
-p1 <- g1 + stat_smooth(method = lm, se=F, colour = "blue") +
-        ggtitle("Changes in star ratings over time for one restaurant") +
+p1 <- g1 + stat_smooth(method = lm, colour = "blue") +
+        ggtitle("Plot 1 \nChanges in star ratings over time for one restaurant") +
         ylim(0,5) +
         xlab("Year") +
         ylab("Average Star rating \n(calculated monthly") +
         theme(axis.title.x=element_text(size = 14)) +
-        theme(axis.title.y=element_text(size = 14))
+        theme(axis.title.y=element_text(size = 14)) +
+        ggplot2::annotate("text",
+                          x=as.Date("2011-01-01"), y=3.2,
+                          label="slope = -0.023 stars/year (±95% CI)", 
+                          colour = "blue")
 print(p1)
 
 ##Now apply this scheme to the rest of the restaurants
@@ -125,7 +128,7 @@ p2 <- g2 + geom_abline(aes(intercept = SlopeDF$Intercept,
                          slope = SlopeDF$Slope),
                      data=SlopeDF,
                      alpha = 0.05) +
-        ggtitle("Changes in star ratings over time for Restaurants") +
+        ggtitle("Plot 2 \nChanges in star ratings over time for Restaurants") +
         ylim(0,5) +
         xlab("Year") +
         ylab("Average Star rating \n(calculated monthly") +
