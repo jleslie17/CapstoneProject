@@ -1,0 +1,6 @@
+library(jsonlite)
+library(tm)
+library(wordcloud)
+library(dplyr)
+library(zoo)
+library(ggplot2)
