@@ -20,6 +20,7 @@ TestDTSum <- summarise(TestDFgrouped, AvStarsPerMonth = mean(Stars))
 TestDFSum <- data.frame(TestDTSum)
 
 ##Plot the star rating over time, averaged monthly
+#png(filename = "Plot1.png")
 g1 <- ggplot(TestDFSum, aes(x=YearMonth, y=AvStarsPerMonth)) + 
         geom_line()
 p1 <- g1 + stat_smooth(method = lm, colour = "blue") +
@@ -34,3 +35,4 @@ p1 <- g1 + stat_smooth(method = lm, colour = "blue") +
                           label="slope = -0.023 stars/year (±95% CI)", 
                           colour = "blue")
 print(p1)
+#dev.off()
