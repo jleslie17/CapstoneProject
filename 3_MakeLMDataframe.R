@@ -1,22 +1,25 @@
+library(jsonlite)
+library(tm)
+library(dplyr)
+library(zoo)
+library(ggplot2)
 
 ##Now apply the scheme to the rest of the restaurants
 ##Make a new data frame with only stars and date data
-StarsDates <- data.frame(Business = RestRevsHiCount$business_id,
-                         Date = RestRevsHiCount$date,
-                         Stars = RestRevsHiCount$stars,
-                         RevID = RestRevsHiCount$review_id,
-                         RevText = RestRevsHiCount$text)
+StarsDates2 <- select(RestRevsHiCount, business_id, 
+                      date, stars, review_id, text)
 ##Add a variable 'YearMonth' that is only the month, ignoring days
-StarsDates$YearMonth <- strftime(StarsDates$Date, "%Y-%m")
-StarsDates$YearMonth <- as.Date(as.yearmon(StarsDates$YearMonth))
+StarsDates2$YearMonth <- strftime(StarsDates2$date, "%Y-%m")
+StarsDates2$YearMonth <- as.Date(as.yearmon(StarsDates2$YearMonth))
 
 ##Group by business and YearMonth
-StarsDatesGrouped <- group_by(StarsDates, Business, YearMonth)
+StarsDatesGrouped2 <- group_by(StarsDates2, business_id, YearMonth)
 ##Calculate the average stars per month and discard RevID, Date, Text
-StarsDatesAveraged <- summarise(StarsDatesGrouped, 
-                                AvStarsPerMonth = mean(Stars))
+StarsDatesAveraged2 <- summarise(StarsDatesGrouped2, 
+                                AvStarsPerMonth = mean(stars))
 ##Convert back into a data frame
-StarsDatesAveraged <- data.frame(StarsDatesAveraged)
+StarsDatesAveraged2 <- data.frame(StarsDatesAveraged2)
+
 
 ##Here I create a function that will calculate a linear regression
 ##model for each business, plotting average star rating over time.
@@ -39,7 +42,7 @@ count <- 0 #Set counter to 0
 ##It is assembled into the dataframe SlopeDF
 for(i in RestsHiCount$business_id) {
         count <- count + 1
-        TempBus <- filter(StarsDatesAveraged, Business == i)
+        TempBus <- filter(StarsDatesAveraged2, business_id == i)
         ReturnedCoefs <- FindCoefs(TempBus)
         SlopeDF[count,1] <- i
         SlopeDF[count,2] <- ReturnedCoefs[[1]]
@@ -48,9 +51,9 @@ for(i in RestsHiCount$business_id) {
 
 ##These two lines give ggplot a date range (PlotData) to use to make the
 ##graph, without going through the entire dataset.
-FirstBus <- StarsDatesAveraged[StarsDatesAveraged$YearMonth == 
-                                       min(StarsDatesAveraged$YearMonth),]
-PlotData <- StarsDatesAveraged[StarsDatesAveraged$Business == FirstBus[1,1],]
+FirstBus <- StarsDatesAveraged2[StarsDatesAveraged2$YearMonth == 
+                                       min(StarsDatesAveraged2$YearMonth),]
+PlotData <- StarsDatesAveraged2[StarsDatesAveraged2$business_id == FirstBus[1,1],]
 
 #png(filename = "Plot2.png")
 g2 <- ggplot(PlotData, 
