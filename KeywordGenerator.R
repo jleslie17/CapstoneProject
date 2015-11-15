@@ -1,6 +1,12 @@
 ##File to be called to generate Keywords
 
-QueryDB <- WorstRevsGrouped[WorstRevsGrouped$business_id == BID,]
+if(BID %in% WorstRevsGrouped$business_id){
+        QueryDB <- WorstRevsGrouped[WorstRevsGrouped$business_id == BID,]
+} else {
+        QueryDB <- BestRevsGrouped[BestRevsGrouped$business_id == BID,]
+}
+
+
 QueryDBGood <- QueryDB[QueryDB$stars > StarsThresh,]
 QueryDBBad <- QueryDB[QueryDB$stars <= StarsThresh,]
 
@@ -20,7 +26,7 @@ CorpusGood <- GetCorpus(QueryDBGood)
 ##Function to build DTM
 getDTM <- function(inputCorp){
         dtmTemp <- DocumentTermMatrix(inputCorp)
-        dtmTemp <- removeSparseTerms(dtmTemp,0.7)
+        dtmTemp <- removeSparseTerms(dtmTemp,0.9)
         return(dtmTemp)
 }
 
