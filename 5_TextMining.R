@@ -12,6 +12,9 @@ source("KeywordGenerator.R")
 KeywordsGood
 KeyWordsBad
 
+length(intersect(KeywordsGood, KeyWordsBad))
+
+
 
 head(unique(WorstRevsGathered$business_id))
 head(unique(BestRevsGathered$business_id))

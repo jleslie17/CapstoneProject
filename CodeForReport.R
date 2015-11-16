@@ -25,6 +25,8 @@ RestRevsHiCount <- RestRevs[RestRevs$business_id %in%
 BID <- "27ADmOieSUZfbiU15als7w" #This is where I put in the business ID of interest
 StarsThresh <- 3.5
 
+BID <- "1MQmujTuU-3qPdoogdA8CQ"
+
 source("getMonthlyAverages.R")
 source("KeywordGenerator.R")
 
