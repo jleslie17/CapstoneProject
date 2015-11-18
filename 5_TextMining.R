@@ -7,7 +7,8 @@ library(SnowballC)
 
 
 StarsThresh <- 3.5
-BID <- "_viHcOY9w_CitP4oHpZYdg" #This is where I put in the business ID of interest
+#This is where I put in the business ID of interest
+BID <- "_viHcOY9w_CitP4oHpZYdg" 
 source("KeywordGenerator.R")
 KeywordsGood
 KeyWordsBad

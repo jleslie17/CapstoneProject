@@ -2,7 +2,8 @@
 title: "Building a tool to assess business performance based on customer reviews"
 author: "Jonathan Leslie"
 date: "November 22, 2015"
-output: pdf_document
+output: 
+        pdf_document
 ---
 
 #Introduction
@@ -15,15 +16,16 @@ This project is a feasibility study aimed at creating an application that can he
 #Methods and Data
 ##Loading Data
 The data for this study came from the Yelp Dataset Challenge (http://www.yelp.com/dataset_challenge). This dataset includes five JSON files corresponding to several aspect of Yelp review data and should be unzipped in the working directory. For this study, I used only the files pertaining to business IDs and reviews. I loaded the files of interest as below and saved them as rds files for subsequent analyses.
-```{r, message=F}
+```{r, message=F, echo=F}
 library(jsonlite)
 library(readr)
 library(tm)
 library(dplyr)
 library(zoo)
 library(ggplot2)
+require(wordcloud)
 ```
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=F}
 PATH <- "yelp_dataset_challenge_academic_dataset"
 BusData <- stream_in(file(paste(PATH, "/",
                                 "yelp_academic_dataset_business.json",sep = "")))
@@ -33,8 +35,8 @@ saveRDS(reviewData, "reviewData.rds")
 saveRDS(BusData, "businessData.rds")
 ```
 
-Becuase this is a feasibility study, I used only a subset of the data. In this case, I examined only restaurants and only those restaurants that had 100 or more reviews in the Yelp data. Here I save those data in a new data frame RestRevsHiCount.
-```{r}
+Becuase this is a feasibility study, I used only a subset of the data. In this case, I examined only restaurants and only those restaurants that had 100 or more reviews in the Yelp data. 
+```{r, echo=FALSE}
 #Reload the data
 BusData <- readRDS("businessData.rds")
 ReviewData <- readRDS("reviewData.rds")
@@ -53,11 +55,11 @@ RestRevsHiCount <- RestRevs[RestRevs$business_id %in%
 ```
 
 ##Examining changes in performance over time
-A central tenant of business is to “know your audience”. While a business may have met the demands of its audience well in the past, consumer taste changes quickly, and it can be hard to stay on top of that as a business owner. To assess how well a business is meeting the demands of its public, I wanted to examine ratings over time. To do this, I wrote a script that gathered review data for a given business (using the business_id field of the business data file, assigned to the variable BID (Business ID). This used only the business_id, review_id, date, stars and text variables of the review data file. Reviews were gathered by month using the as.yearmon() command and then averaged by month. 
+A central tenant of business is to “know your audience”. While a business may have met the demands of its audience well in the past, consumer taste changes quickly, and it can be hard to stay on top of that as a business owner. To assess how well a business is meeting the demands of its public, I wanted to examine ratings over time. To do this, I wrote a script that gathered review data for an example business (using the business_id field of the business data file, assigned to the variable BID (Business ID). This used only the business_id, review_id, date, stars and text variables of the review data file. Reviews were gathered by month using the as.yearmon() command and average monthly star ratings were calculated. The first six lines of the resulting data frame are shown below.
 
-```{r}
+```{r, echo=F}
 #Will have BID defined here.
-BID <- "27ADmOieSUZfbiU15als7w" 
+BID <- "2WHP5nhS1rFszfRBKe6fWQ" 
 
 #This is where I put in the business ID of interest
 #Here we build a dataframe with the monthly averages
@@ -83,8 +85,7 @@ To visualise the trend, the program plots average stars over time and draws a li
 ```{r}
 fit <- lm(AvStarsPerMonth~YearMonth, data = BIDStarsDatesGrouped)
 ```
-```{r, echo=F}
-
+```{r, echo=F, out.width='.49\\textwidth', fig.align='center'}
 #Plot the averages over time
 Data <- BIDStarsDatesGrouped
 g <- ggplot(Data, 
@@ -98,11 +99,11 @@ p <- g + geom_point() +
         theme(axis.title.x=element_text(size = 14)) +
         theme(axis.title.y=element_text(size = 14))
 print(p)
-
-print("Change in star rating (stars per year):")
-x <- print(round(365*(fit$coef[[2]]),2)) #Slope of LM is per day
 ```
-As we can see in the plot, for this example restaurant, the reviews have gotten worse with time. The owner of this restaurant might want to know why. The next section deals with ways to help answer that question.
+
+Change in star rating (stars per year) for business `r BID`:  __`r round(365*fit$coef[[2]], 2)`__
+
+As we can see in the plot, for this example restaurant, the reviews have, on average, gotten worse with time. The owner of this restaurant might want to know why. The next section deals with ways to help answer that question.
 
 ##Generating word lists for good and bad reviews
 To help shed light on factors that might be contributing to customer satisfaction (either for the good or the bad), I wanted to emply text-mining techniques on the texts that accompany each review. I hypothesize that such an analysis might reveal trends associated with poor customer satisfaction.
@@ -113,7 +114,9 @@ Since each business owner may want to decide what star rating differentiates bet
 StarsThresh <- 3.5
 ```
 
-```{r, echo=FALSE, results="hide"}
+To perform text-mining, I used the tm package. The program generated a corpus for all reviews in each pool (good and bad). The corpora were preprocessed to remove whitespace, transform all words to lowercase, remove stopwords (such as 'the') and stemmed to retrieve word radicals (free of suffixes). Punctuation was also removed. Document-term matrices were generated for each corpus, and mean frequency (how often each term appeared in a corpus) was calculated for each term. The terms were then sorted in order of decreasing frequency and the top 20 were printed as output.
+
+```{r, echo=FALSE, comment=''}
 QueryDB <- BIDStarsDates
 QueryDBGood <- QueryDB[QueryDB$stars > StarsThresh,]
 QueryDBBad <- QueryDB[QueryDB$stars <= StarsThresh,]
@@ -124,7 +127,7 @@ GetCorpus <- function(inputDB){
         CorpusTemp <- tm_map(CorpusTemp, stripWhitespace)
         CorpusTemp <- tm_map(CorpusTemp, content_transformer(tolower))
         CorpusTemp <- tm_map(CorpusTemp, removeWords, stopwords("english"))
-        CorpusTemp <- tm_map(CorpusTemp, stemDocument) #Maybe don't want to do this?
+        CorpusTemp <- tm_map(CorpusTemp, stemDocument) 
         CorpusTemp <- tm_map(CorpusTemp, removePunctuation)
         return(CorpusTemp)
 }
@@ -146,9 +149,31 @@ KeywordsGood <- sort(round(apply(DTMGood, MARGIN = 2, FUN = mean),2),
 KeywordsBad <- sort(round(apply(DTMBad, MARGIN = 2, FUN = mean),2),
                     decreasing = T)
 print("Keywords associated with good reviews:")
-print(KeywordsGood)
+print(KeywordsGood[1:20])
 print("Keywords associated with bad reviews:")
-print(KeywordsBad)
+print(KeywordsBad[1:20])
+```
+
+To better visualize word usage, I took advantage of the wordcloud package to produce a wordcloud for each group (good and bad reviews).   
+
+```{r, echo=FALSE, fig.height=3, fig.width=3, dev='png'}
+#To follow wordcloud's recipe
+mGood <- as.matrix(DTMGood)
+mBad <- as.matrix(DTMBad)
+
+vGood <- sort(colSums(mGood), decreasing = T)
+vBad <- sort(colSums(mBad), decreasing = T)
+dGood <- data.frame(word = names(vGood), freq=vGood)
+dBad <- data.frame(word = names(vBad), freq=vBad)
+
+wordcloud(dGood$word, dGood$freq, scale=c(2.5,0.5), 
+          max.words=50, random.order=FALSE, 
+          rot.per=0.35, use.r.layout=FALSE, 
+          colors=brewer.pal(8, 'Dark2'))
+wordcloud(dBad$word, dBad$freq, scale=c(2.5,0.5), 
+          max.words=50, random.order=FALSE, 
+          rot.per=0.35, use.r.layout=FALSE, 
+          colors=brewer.pal(8, 'Dark2'))
 ```
 
 

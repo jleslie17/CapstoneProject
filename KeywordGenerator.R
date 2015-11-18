@@ -31,27 +31,34 @@ getDTM <- function(inputCorp){
 DTMGood <- getDTM(CorpusGood)
 DTMBad <- getDTM(CorpusBad)
 
-
-findFreqTerms(DTMGood, 100)
-findFreqTerms(DTMBad,100)
+findFreqTerms(DTMGood, 5)
+findFreqTerms(DTMBad, 5)
 KeywordsGood <- sort(round(apply(DTMGood, MARGIN = 2, FUN = mean),2), decreasing = T)
 KeywordsBad <- sort(round(apply(DTMBad, MARGIN = 2, FUN = mean),2), decreasing = T)
 print("Keywords associated with good reviews:")
-print(KeywordsGood)
+print(KeywordsGood[1:20])
 print("Keywords associated with bad reviews:")
-print(KeywordsBad)
 print(KeywordsBad[1:20])
 
 
-wordcloud(CorpusGood, scale=c(5,0.5), 
+#To follow wordcloud's recipe
+mGood <- as.matrix(DTMGood)
+mBad <- as.matrix(DTMBad)
+
+vGood <- sort(colSums(mGood), decreasing = T)
+vBad <- sort(colSums(mBad), decreasing = T)
+dGood <- data.frame(word = names(vGood), freq=vGood)
+dBad <- data.frame(word = names(vBad), freq=vBad)
+
+
+wordcloud(dGood$word, dGood$freq, scale=c(2.5,0.5), 
           max.words=100, random.order=FALSE, 
           rot.per=0.35, use.r.layout=FALSE, 
           colors=brewer.pal(8, 'Dark2'))
 
 
-wordcloud(CorpusBad, scale=c(5,0.5), 
+wordcloud(dBad$word, dBad$freq, scale=c(2.5,0.5), 
           max.words=100, random.order=FALSE, 
           rot.per=0.35, use.r.layout=FALSE, 
           colors=brewer.pal(8, 'Dark2'))
 
-intersect(KeywordsGood, KeywordsBad)
