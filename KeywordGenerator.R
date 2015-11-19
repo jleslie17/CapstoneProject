@@ -51,14 +51,20 @@ dGood <- data.frame(word = names(vGood), freq=vGood)
 dBad <- data.frame(word = names(vBad), freq=vBad)
 
 
+png(filename = "WordcloudGood.png", width = 240, height = 280,
+    pointsize = 10)
 wordcloud(dGood$word, dGood$freq, scale=c(2.5,0.5), 
           max.words=100, random.order=FALSE, 
           rot.per=0.35, use.r.layout=FALSE, 
           colors=brewer.pal(8, 'Dark2'))
+title(main = "'Good' reviews")
+dev.off()
 
-
+png(filename = "WordcloudBad.png", width = 240, height = 280, 
+    pointsize = 10)
 wordcloud(dBad$word, dBad$freq, scale=c(2.5,0.5), 
           max.words=100, random.order=FALSE, 
           rot.per=0.35, use.r.layout=FALSE, 
           colors=brewer.pal(8, 'Dark2'))
-
+title(main = "'Bad' reviews")
+dev.off()
