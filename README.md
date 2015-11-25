@@ -1,6 +1,6 @@
 # CapstoneProject
 
-# "Building a tool to assess business performance based on customer reviews"
+# Building a tool to assess business performance based on customer reviews
 
 With the increasing popularity of on-line review databases such as Yelp, both consumers and business owners now have access to a wealth of customer review data that was not possible a decade ago. For the business owner, this data represents a valuable resource, providing insight into customer satisfaction and business performance. While some of the more objective assessments, such as star ratings, may give some idea of customer satisfaction, they do little to provide real insight into exactly how a given business is meeting the expectations of its customers, or as the case may be, falling short. 
 
